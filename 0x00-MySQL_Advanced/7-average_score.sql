@@ -8,11 +8,9 @@ DROP PROCEDURE IF EXISTS ComputeAverageScoreForUser;
 DELIMITER $$
 -- create the procedure with 1 arg
 CREATE PROCEDURE ComputeAverageScoreForUser(
-    IN user_id INT
-)
+    IN user_id INT)
 BEGIN 
     -- declare variable to stroee temp avg score
-
     DECLARE avg_score FLOAT;
 
     -- Calculate the avg score for the corrections Table for score column
@@ -22,7 +20,7 @@ BEGIN
 
     -- Updat  the users Table and set the average score
     UPDATE users
-    SET average_score = IFNULL(avg_score, 0)
+    SET average_score = avg_score
     WHERE id = user_id;
 
 END $$
