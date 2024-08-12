@@ -5,7 +5,7 @@
     { $set: {address: "972 Mission street"} }
 )*/
 
- db.school.updateOne(
+ db.school.update(
 	{ name: "Holberton school"},
 	{ $set: {address: "972 Mission street"} },
 	{multi: true}
