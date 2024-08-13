@@ -42,16 +42,28 @@ def nginx_logs(db):
     print(result2, "status check")
 
     # Retrieve and count IP addresses
-    pipeline = [
-        {"$group": {"_id": "$ip", "count": {"$sum": 1}}},
+
+    top_ips = db.nginx.aggregate([
+        {"$group":
+            {
+                "_id": "$ip",
+                "count": {"$sum": 1}
+            }
+         },
         {"$sort": {"count": -1}},
-        {"$limit": 10}
-    ]
-    top_ips = list(db.nginx.aggregate(pipeline))
+        {"$limit": 10},
+        {"$project": {
+            "_id": 0,
+            "ip": "$_id",
+            "count": 1
+        }}
+    ])
 
     print("IPs:")
-    for ip in top_ips:
-        print(f"    {ip['_id']}: {ip['count']}")
+    for top_ip in top_ips:
+        ip = top_ip.get("ip")
+        count = top_ip.get("count")
+        print(f'\t{ip}: {count}')
 
 
 if __name__ == "__main__":
