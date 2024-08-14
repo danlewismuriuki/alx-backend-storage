@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""
+A simple cache class that interfaces with Redis to store data
+using unique keys.
+"""
+from typing import Union
+import redis
+import uuid
+
+
+class Cache:
+    """
+    A simple cache class that interfaces with Redis to store data
+    using unique keys.
+
+    Attributes:
+    _redis : redis.Redis
+        A private attribute that holds an instance of the Redis client.
+
+    Methods:
+    __init__():
+        Initializes the Redis client and flushes the database.
+
+    store(data: Union[str, bytes, int, float]) -> str:
+        Generates a random key, stores the input data in Redis
+        using the key,
+        and returns the key.
+    """
+
+    def __init__(self):
+        """
+        Initialize the Cache instance.
+
+        This method initializes the Redis client by creating
+        an instance of
+        `redis.Redis()` and assigns it to the private attribute `_redis`.
+        It then flushes the Redis database, clearing all existing data.
+        """
+        self._redis = redis.Redis()
+        self._redis.flushdb()
+
+    def store(self, data: Union[str, bytes, int, float]) -> str:
+        """
+        Parameters:
+            data : Union[str, bytes, int, float]
+            The data to be stored in Redis. The data can be of
+            type string,
+            bytes, integer, or float.
+        Returns:
+        str
+        The unique key under which the data has been stored
+        in Redis.
+        """
+        key = str(uuid.uuid4())
+        self._redis.set(key, data)
+        return key
