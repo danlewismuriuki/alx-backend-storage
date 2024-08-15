@@ -3,7 +3,7 @@
 A simple cache class that interfaces with Redis to store data
 using unique keys.
 """
-from typing import Union
+from typing import Union, Optional, Callable
 import redis
 import uuid
 
@@ -54,3 +54,59 @@ class Cache:
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
+
+    def get(self, key: str,
+            fn: Optional[Callable[[bytes], any]] = None
+            ) -> Optional[Union[str, int, float]]:
+
+        """
+        Retrieves the value associated with the given key from Redis.
+        Optionally applies a conversion function to the retrieved data.
+
+        Args:
+            key (str): The key of the data to be retrieved.
+            fn (Optional[Callable[[bytes], any]]): An optional
+                function to convert the data from bytes.
+
+        Returns:
+            Optional[Union[str, int, float]]: The retrieved data,
+            converted if a function is provided,
+            or None if the key does not exist.
+        """
+        data = self._redis.get(key)
+
+        if data is None:
+            return None
+
+        if fn:
+            return fn(data)
+
+        return data
+
+    def get_str(self, key: str) -> Optional[str]:
+        """
+        Retrieves the value associated with the given key
+        and converts it to a UTF-8 string.
+
+        Args:
+            key (str): The key of the data to be retrieved.
+
+        Returns:
+            Optional[str]: The retrieved value as a UTF-8 string,
+            or None if the key does not exist.
+        """
+        return self.get(key, fn=lambda d: d.decode("utf-8"))
+
+    def get_int(self, key: str) -> Optional[int]:
+        """
+        Retrieves the value associated with the given key
+        and converts it to an integer.
+
+        Args:
+            key (str): The key of the data to be retrieved.
+
+        Returns:
+            Optional[int]: The retrieved value as an integer,
+            or None if the key does not exist.
+        """
+        return self.get(key, fn=int)
