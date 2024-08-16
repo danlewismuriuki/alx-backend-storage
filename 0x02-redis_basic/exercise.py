@@ -13,7 +13,7 @@ def count_calls(method: Callable) -> Callable:
     '''Tracks the number of calls made to a method in a Cache class.
     '''
     @wraps(method)
-    def wrapper(self, *args, **kwargs) -> Any:
+    def invoker(self, *args, **kwargs) -> Any:
         """A decorator that counts how many times a method is called.
         """
         # Create a Redis key for the method using the qualified name
@@ -21,7 +21,7 @@ def count_calls(method: Callable) -> Callable:
             self._redis.incr(method.__qualname__)
         # Call the original method and return its result
         return method(self, *args, **kwargs)
-    return wrapper
+    return invoker
 
 
 class Cache:
