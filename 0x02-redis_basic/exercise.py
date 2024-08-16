@@ -14,12 +14,10 @@ def count_calls(method: Callable) -> Callable:
     '''
     @wraps(method)
     def invoker(self, *args, **kwargs) -> Any:
-        """A decorator that counts how many times a method is called.
-        """
-        # Create a Redis key for the method using the qualified name
+        '''Invokes the given method after incrementing its call counter.
+        '''
         if isinstance(self._redis, redis.Redis):
             self._redis.incr(method.__qualname__)
-        # Call the original method and return its result
         return method(self, *args, **kwargs)
     return invoker
 
