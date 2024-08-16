@@ -3,7 +3,7 @@
 A simple cache class that interfaces with Redis to store data
 using unique keys.
 """
-from typing import Union, Optional, Callable
+from typing import Union, Optional, Callable, Any
 import redis
 import uuid
 from functools import wraps
@@ -11,7 +11,7 @@ from functools import wraps
 
 def count_calls(method: Callable) -> Callable:
     @wraps(method)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self, *args, **kwargs) -> Any:
         """
          A decorator that counts how many times a method is called.
         Args:
