@@ -10,20 +10,6 @@ from functools import wraps
 
 
 def count_calls(method: Callable) -> Callable:
-    """
-    A decorator that counts how many times a method is called.
-
-    The count is stored in a Redis database, using the qualified name
-    of the method as the key. Each time the method is called, the 
-    counter for that key is incremented.
-
-    Args:
-        method (Callable): The method to be wrapped by the decorator.
-
-    Returns:
-        Callable: The wrapped method with added functionality to count 
-                  its calls in Redis.
-    """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """
