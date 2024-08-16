@@ -6,6 +6,17 @@ using unique keys.
 from typing import Union, Optional, Callable
 import redis
 import uuid
+from functools import wraps
+
+
+def count_calls(method: Callable):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        key = method.__qualname__
+        self._redis.incr(key)
+
+        return method(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
@@ -39,6 +50,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         Parameters:
@@ -58,7 +70,6 @@ class Cache:
     def get(self, key: str,
             fn: Optional[Callable[[bytes], any]] = None
             ) -> Optional[Union[str, int, float]]:
-
         """
         Retrieves the value associated with the given key from Redis.
         Optionally applies a conversion function to the retrieved data.
