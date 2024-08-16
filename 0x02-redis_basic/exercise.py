@@ -26,11 +26,8 @@ def count_calls(method: Callable) -> Callable:
         def some_method(self, *args):
             """
         # Create a Redis key for the method using the qualified name
-        key = method.__qualname__
-
-        # Increment the count for this method in Redis
-        self._redis.incr(key)
-
+        if isinstance(self._redis, redis.Redis):
+            self._redis.incr(method.__qualname__)
         # Call the original method and return its result
         return method(self, *args, **kwargs)
     return wrapper
