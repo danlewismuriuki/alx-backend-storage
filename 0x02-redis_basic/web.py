@@ -57,6 +57,9 @@ def cache_page(method: Callable) -> Callable:
         cache_key = f"cache:{url}"
         count_key = f"count:{url}"
 
+        # Increment the access count
+        r.incr(count_key)
+
         # Check if the page is in the cache
         cached_page = r.get(cache_key)
         if cached_page:
@@ -67,9 +70,6 @@ def cache_page(method: Callable) -> Callable:
 
         # Cache the result with an expiration time of 10 seconds
         r.setex(cache_key, 10, page_content)
-
-        # Increment the access count
-        r.incr(count_key)
 
         return page_content
     return wrapper
