@@ -30,6 +30,7 @@ def cache_data(method: Callable) -> Callable:
         # Fetch the page content if not cached
         page_content = method(url)
 
+        r.set(f'count:{url}', 0)
         # Cache the result with an expiration time of 10 seconds
         r.setex(f'result:{url}', 10, page_content)
 
@@ -44,7 +45,7 @@ def get_page(url: str) -> str:
     return requests.get(url).text
 
 
-# Example usage
-if __name__ == "__main__":
-    url = "http://slowwly.robertomurray.co.uk"
-    print(get_page(url))
+# # Example usage
+# if __name__ == "__main__":
+#     url = "http://slowwly.robertomurray.co.uk"
+#     print(get_page(url))
