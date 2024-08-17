@@ -16,7 +16,7 @@ def cache_data(method: Callable) -> Callable:
     '''Caches the output of fetched data and tracks access counts.
     '''
     @wraps(method)
-    def wrapper(url) -> str:
+    def wrapper(url: str) -> str:
         '''The wrapper function for caching the output and counting access.
         '''
         # Increment the access count before checking the cache
@@ -30,7 +30,6 @@ def cache_data(method: Callable) -> Callable:
         # Fetch the page content if not cached
         page_content = method(url)
 
-        r.set(f'count:{url}', 0)
         # Cache the result with an expiration time of 10 seconds
         r.setex(f'result:{url}', 10, page_content)
 
