@@ -16,7 +16,7 @@ def cache_data(method: Callable) -> Callable:
     '''Caches the output of fetched data and tracks access counts.
     '''
     @wraps(method)
-    def wrapper(url: str) -> str:
+    def wrapper(url) -> str:
         '''The wrapper function for caching the output and counting access.
         '''
         # Increment the access count before checking the cache
@@ -45,7 +45,7 @@ def get_page(url: str) -> str:
     return requests.get(url).text
 
 
-# # Example usage
-# if __name__ == "__main__":
-#     url = "http://slowwly.robertomurray.co.uk"
-#     print(get_page(url))
+# Example usage
+if __name__ == "__main__":
+    url = "http://slowwly.robertomurray.co.uk"
+    print(get_page(url))
