@@ -1,98 +1,47 @@
 #!/usr/bin/env python3
-"""
-web.py - A module for caching HTML content from URLs using Redis.
-
-This module provides functionality to fetch and cache HTML content from
-    agiven URL.
-It uses a decorator to cache the result of the `get_page`
-    function in Redis with
-    an expiration time of 10 seconds.
-Additionally, it tracks how many times a particular URL has been accessed.
-
-Modules:
-    cache_page(method: Callable) -> Callable:
-        A decorator that caches the result of the `get_page` function.
-
-    get_page(url: str) -> str:
-        Fetches the HTML content of a URL and caches it with
-            an expiration time.
-
-Usage Example:
-    url = "http://example.com"
-    content = get_page(url)
-    print(content)
-
-Dependencies:
-    - requests: For making HTTP requests.
-    - redis: For interacting with Redis to cache results and
-        track access counts.
-"""
-
+'''A module with tools for request caching and tracking.
+'''
 import redis
 import requests
-from typing import Callable
 from functools import wraps
+from typing import Callable
 
 # Connect to Redis
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis()
+'''The module-level Redis instance.
+'''
 
 
-def cache_page(method: Callable) -> Callable:
-    """
-    Decorator to cache the result of the get_page function.
-
-    Args:
-        method (Callable): The function to be decorated, expected
-            to be `get_page`.
-
-    Returns:
-        Callable: The wrapped function with caching functionality.
-
-    This decorator checks if the requested URL's content is already cached.
-    If it is, it returns the cached content. If not, it fetches the content,
-    caches it with a 10-second expiration, and tracks the number of accesses.
-    """
+def cache_data(method: Callable) -> Callable:
+    '''Caches the output of fetched data and tracks access counts.
+    '''
     @wraps(method)
     def wrapper(url: str) -> str:
-        cache_key = f"cache:{url}"
-        count_key = f"count:{url}"
-
-        # Increment the access count
-        r.incr(count_key)
+        '''The wrapper function for caching the output and counting access.
+        '''
+        # Increment the access count before checking the cache
+        r.incr(f'count:{url}')
 
         # Check if the page is in the cache
-        cached_page = r.get(cache_key)
-        if cached_page:
-            return cached_page.decode('utf-8')
+        cached_result = r.get(f'result:{url}')
+        if cached_result:
+            return cached_result.decode('utf-8')
 
-        # Fetch the page content
+        # Fetch the page content if not cached
         page_content = method(url)
 
         # Cache the result with an expiration time of 10 seconds
-        r.setex(cache_key, 10, page_content)
+        r.setex(f'result:{url}', 10, page_content)
 
         return page_content
     return wrapper
 
 
-@cache_page
+@cache_data
 def get_page(url: str) -> str:
-    """
-    Fetch the HTML content of a URL.
-
-    Args:
-        url (str): The URL to fetch content from.
-
-    Returns:
-        str: The HTML content of the given URL.
-
-    This function makes an HTTP GET request to the provided
-        URL and returns the
-    HTML content as a string. The result is cached by the
-        `cache_page` decorator.
-    """
-    response = requests.get(url)
-    return response.text
+    '''Fetches the content of a URL and caches the response.
+    '''
+    return requests.get(url).text
 
 
 # Example usage
