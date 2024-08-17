@@ -69,7 +69,7 @@ def replay(method: Callable) -> None:
     for inp, out in zip(inputs, outputs):
         print(
             f"{method.__qualname__}("
-            f"*{inp.decode('utf-8')},) -> {out.decode('utf-8')}"
+            f"*{inp.decode('utf-8')}) -> {out.decode('utf-8')}"
         )
 
 
