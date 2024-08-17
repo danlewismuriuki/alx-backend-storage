@@ -68,7 +68,9 @@ def replay(method: Callable) -> None:
     # Iterate over the zipped inputs and outputs, and print them
     for inp, out in zip(inputs, outputs):
         print(
-            f"{method.__qualname__}(*{inp.decode('utf-8')},) -> {out.decode('utf-8')}")
+            f"{method.__qualname__}(
+                *{inp.decode('utf-8')},) -> {out.decode('utf-8')}"
+        )
 
 
 class Cache:
