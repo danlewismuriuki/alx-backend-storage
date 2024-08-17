@@ -6,33 +6,45 @@ import requests
 from functools import wraps
 from typing import Callable
 
-
-redis_store = redis.Redis()
+# Connect to Redis
+r = redis.Redis()
 '''The module-level Redis instance.
 '''
 
 
-def data_cacher(method: Callable) -> Callable:
-    '''Caches the output of fetched data.
+def cache_data(method: Callable) -> Callable:
+    '''Caches the output of fetched data and tracks access counts.
     '''
     @wraps(method)
-    def invoker(url) -> str:
-        '''The wrapper function for caching the output.
+    def wrapper(url: str) -> str:
+        '''The wrapper function for caching the output and counting access.
         '''
-        redis_store.incr(f'count:{url}')
-        result = redis_store.get(f'result:{url}')
-        if result:
-            return result.decode('utf-8')
-        result = method(url)
-        redis_store.set(f'count:{url}', 0)
-        redis_store.setex(f'result:{url}', 10, result)
-        return result
-    return invoker
+        # Increment the access count before checking the cache
+        r.incr(f'count:{url}')
+
+        # Check if the page is in the cache
+        cached_result = r.get(f'result:{url}')
+        if cached_result:
+            return cached_result.decode('utf-8')
+
+        # Fetch the page content if not cached
+        page_content = method(url)
+
+        # Cache the result with an expiration time of 10 seconds
+        r.setex(f'result:{url}', 10, page_content)
+
+        return page_content
+    return wrapper
 
 
-@data_cacher
+@cache_data
 def get_page(url: str) -> str:
-    '''Returns the content of a URL after caching the request's response,
-    and tracking the request.
+    '''Fetches the content of a URL and caches the response.
     '''
     return requests.get(url).text
+
+
+# Example usage
+if __name__ == "__main__":
+    url = "http://slowwly.robertomurray.co.uk"
+    print(get_page(url))
